@@ -34,6 +34,7 @@ button{padding:8px!important;font-size:13px!important;border-radius:9px!importan
 .btnAtt{width:38px!important;height:38px;flex:0 0 38px;padding:0!important;border-radius:50%!important;background:rgba(255,255,255,.18)!important;border:1px solid rgba(255,255,255,.35)!important;font-size:18px!important;line-height:1}
 .tabs{grid-template-columns:repeat(5,minmax(0,1fr))!important}.tab{font-size:10px!important;padding:7px 1px!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tab .e{font-size:17px!important}
 .btnAtt:active{transform:rotate(180deg);transition:transform .3s}
+h2.dobra{cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin:0!important;user-select:none;-webkit-user-select:none}h2.dobra .seta{font-size:13px;font-weight:bold;background:#1f8a4c;color:#fff;border-radius:20px;padding:4px 10px;flex:0 0 auto}h2.dobra.on .seta{background:#e8eef2;color:#17384c}h2.dobra.on{margin-bottom:10px!important}.fbody{display:none}.fbody.aberto{display:block}
 </style></head>
 <body><div class="wall"></div>
 <header><div style="display:flex;align-items:center;gap:8px"><h1 style="flex:1">🏍️ Controle da Moto</h1><button class="btnAtt" onclick="atualizarApp()" title="Atualizar aplicativo" aria-label="Atualizar aplicativo">🔄</button></div><p>Óleo • Manutenção • Abastecimento • Lavagem • Documento • Financiamento</p></header>
@@ -162,7 +163,7 @@ async function instalarApp(){
  $('passosInstalar').innerHTML=h;$('modalInstalar').classList.remove('hidden')}
 function fecharInstalar(){$('modalInstalar').classList.add('hidden')}
 
-const VERSAO='3.1',VERSAO_DATA='08/10/2026';
+const VERSAO='3.2',VERSAO_DATA='08/10/2026';
 function mostrarVersao(extra){$('versaoInfo').innerHTML='Versão '+VERSAO+' • '+VERSAO_DATA+(extra||'')}
 async function atualizarApp(){try{if('caches'in window){let k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)))}let r=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(r)await r.update()}catch(e){}location.reload()}
 async function checarVersao(){mostrarVersao();if(!navigator.onLine){mostrarVersao(' • 📴 sem internet');return}
@@ -357,8 +358,19 @@ function renderPostos(){let l=get('fuels',[]),m={};l.forEach(x=>{if(!x.posto)ret
 
 const ROT={Fuel:'💾 Salvar abastecimento',Oleo:'💾 Registrar troca',Man:'💾 Salvar manutenção',Lav:'💾 Salvar lavagem'};
 function modoEdit(t,desc){let b=$('ed'+t),on=!!desc;if(!b)return;b.style.display=on?'block':'none';b.innerHTML=on?`✏️ <b>Editando:</b> ${desc}<br><span style="font-size:12px">Mude o que quiser e toque em <b>Salvar alterações</b>. Não cria um novo registro.</span>`:'';$('bs'+t).textContent=on?'💾 Salvar alterações':ROT[t];$('bl'+t).textContent=on?'✖️ Cancelar edição':'Limpar';$('bs'+t).style.background=on?'#1f8a4c':''}
+const DOBRA={Oleo:['Registrar troca de óleo','oleos'],Man:['Registrar manutenção','mans'],Fuel:['Registrar abastecimento','fuels'],Lav:['Registrar lavagem','lavagens']};
+function montarDobras(){Object.entries(DOBRA).forEach(([t,[txt]])=>{let h=[...document.querySelectorAll('.card h2')].find(x=>x.textContent.includes(txt));if(!h||h.dataset.dobra)return;let card=h.parentElement,body=document.createElement('div');body.id='fb'+t;body.className='fbody';
+ while(h.nextSibling)body.appendChild(h.nextSibling);card.appendChild(body);h.dataset.dobra=t;h.classList.add('dobra');let ic=h.textContent.trim().split(' ')[0];h.innerHTML=`<span>${ic} ${txt}</span><span class="seta">+ Novo</span>`;h.onclick=()=>body.classList.contains('aberto')?fecharForm(t):abrirForm(t);fecharForm(t)})}
+function abrirForm(t){let b=$('fb'+t);if(!b)return;b.classList.add('aberto');let h=b.parentElement.querySelector('h2.dobra');h.classList.add('on');h.querySelector('.seta').textContent='✕ Fechar'}
+function fecharForm(t){let b=$('fb'+t);if(!b)return;b.classList.remove('aberto');let h=b.parentElement.querySelector('h2.dobra');h.classList.remove('on');h.querySelector('.seta').textContent='+ Novo'}
+function ligarDobras(){montarDobras();
+ const ed={Fuel:'editarFuel',Oleo:'editarOleo',Man:'editarMan',Lav:'editarLav'},sv={Fuel:'salvarFuel',Oleo:'salvarOleo',Man:'salvarMan',Lav:'salvarLav'},lp={Fuel:'limparFuel',Oleo:'limparOleo',Man:'limparMan',Lav:'limparLav'};
+ Object.keys(DOBRA).forEach(t=>{let k=DOBRA[t][1];
+  let e=window[ed[t]];window[ed[t]]=function(){abrirForm(t);let r=e.apply(this,arguments);setTimeout(()=>$('fb'+t).parentElement.scrollIntoView({behavior:'smooth',block:'start'}),80);return r};
+  let s=window[sv[t]];window[sv[t]]=function(){let a=localStorage.getItem(K(k));let r=s.apply(this,arguments);if(localStorage.getItem(K(k))!==a)fecharForm(t);return r};
+  let c=window[lp[t]];window[lp[t]]=function(){let editando=$('ed'+t)&&$('ed'+t).style.display==='block';let r=c.apply(this,arguments);if(editando)fecharForm(t);return r}})}
 function render(){try{dicaNivel()}catch(e){}renderMotoBar();renderFin();renderLav();renderMotoResumo();renderIPVA();renderSeguro();carregarMoto();renderOleo();renderMan();renderFuel();renderDoc()}
 ['renderOleo','renderMan','renderFuel','renderDoc','renderLav','renderFin'].forEach(n=>{const f=window[n];window[n]=function(){const r=f.apply(this,arguments);try{renderPainel()}catch(e){console.error(e)}return r}});
-['editFuel','editOleo','editMan','editLav'].forEach(k=>localStorage.removeItem(K(k)));$('lavData').value=today();$('oleoData').value=today();$('oleoIntervalo').value=localStorage.getItem(K('oleoIntervalo'))||'';formatarKms();$('manData').value=today();$('fuelData').value=today();render();checarVersao();
+ligarDobras();['editFuel','editOleo','editMan','editLav'].forEach(k=>localStorage.removeItem(K(k)));$('lavData').value=today();$('oleoData').value=today();$('oleoIntervalo').value=localStorage.getItem(K('oleoIntervalo'))||'';formatarKms();$('manData').value=today();$('fuelData').value=today();render();checarVersao();
 if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 </script></body></html>
