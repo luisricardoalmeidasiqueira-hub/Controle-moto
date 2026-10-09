@@ -163,7 +163,7 @@ async function instalarApp(){
  $('passosInstalar').innerHTML=h;$('modalInstalar').classList.remove('hidden')}
 function fecharInstalar(){$('modalInstalar').classList.add('hidden')}
 
-const VERSAO='3.2',VERSAO_DATA='08/10/2026';
+const VERSAO='3.3',VERSAO_DATA='09/10/2026';
 function mostrarVersao(extra){$('versaoInfo').innerHTML='Versão '+VERSAO+' • '+VERSAO_DATA+(extra||'')}
 async function atualizarApp(){try{if('caches'in window){let k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)))}let r=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(r)await r.update()}catch(e){}location.reload()}
 async function checarVersao(){mostrarVersao();if(!navigator.onLine){mostrarVersao(' • 📴 sem internet');return}
@@ -358,14 +358,16 @@ function renderPostos(){let l=get('fuels',[]),m={};l.forEach(x=>{if(!x.posto)ret
 
 const ROT={Fuel:'💾 Salvar abastecimento',Oleo:'💾 Registrar troca',Man:'💾 Salvar manutenção',Lav:'💾 Salvar lavagem'};
 function modoEdit(t,desc){let b=$('ed'+t),on=!!desc;if(!b)return;b.style.display=on?'block':'none';b.innerHTML=on?`✏️ <b>Editando:</b> ${desc}<br><span style="font-size:12px">Mude o que quiser e toque em <b>Salvar alterações</b>. Não cria um novo registro.</span>`:'';$('bs'+t).textContent=on?'💾 Salvar alterações':ROT[t];$('bl'+t).textContent=on?'✖️ Cancelar edição':'Limpar';$('bs'+t).style.background=on?'#1f8a4c':''}
-const DOBRA={Oleo:['Registrar troca de óleo','oleos'],Man:['Registrar manutenção','mans'],Fuel:['Registrar abastecimento','fuels'],Lav:['Registrar lavagem','lavagens']};
+const DOBRA={Oleo:['Registrar troca de óleo','oleos'],Man:['Registrar manutenção','mans'],Fuel:['Registrar abastecimento','fuels'],Lav:['Registrar lavagem','lavagens'],Doc:['Documento da moto','doc']};
 function montarDobras(){Object.entries(DOBRA).forEach(([t,[txt]])=>{let h=[...document.querySelectorAll('.card h2')].find(x=>x.textContent.includes(txt));if(!h||h.dataset.dobra)return;let card=h.parentElement,body=document.createElement('div');body.id='fb'+t;body.className='fbody';
  while(h.nextSibling)body.appendChild(h.nextSibling);card.appendChild(body);h.dataset.dobra=t;h.classList.add('dobra');let ic=h.textContent.trim().split(' ')[0];h.innerHTML=`<span>${ic} ${txt}</span><span class="seta">+ Novo</span>`;h.onclick=()=>body.classList.contains('aberto')?fecharForm(t):abrirForm(t);fecharForm(t)})}
 function abrirForm(t){let b=$('fb'+t);if(!b)return;b.classList.add('aberto');let h=b.parentElement.querySelector('h2.dobra');h.classList.add('on');h.querySelector('.seta').textContent='✕ Fechar'}
-function fecharForm(t){let b=$('fb'+t);if(!b)return;b.classList.remove('aberto');let h=b.parentElement.querySelector('h2.dobra');h.classList.remove('on');h.querySelector('.seta').textContent='+ Novo'}
+function fecharForm(t){let b=$('fb'+t);if(!b)return;b.classList.remove('aberto');let h=b.parentElement.querySelector('h2.dobra');h.classList.remove('on');h.querySelector('.seta').textContent=(t==='Doc'&&get('doc',null))?'✏️ Editar':'+ Novo'}
 function ligarDobras(){montarDobras();
+ let sd=window.salvarDoc;window.salvarDoc=function(){let a=localStorage.getItem(K('doc'));let r=sd.apply(this,arguments);if(localStorage.getItem(K('doc'))!==a)fecharForm('Doc');return r};
+ let rd=window.renderDoc;window.renderDoc=function(){let r=rd.apply(this,arguments);if(!get('doc',null))abrirForm('Doc');else if(!$('fbDoc').classList.contains('aberto'))fecharForm('Doc');return r};
  const ed={Fuel:'editarFuel',Oleo:'editarOleo',Man:'editarMan',Lav:'editarLav'},sv={Fuel:'salvarFuel',Oleo:'salvarOleo',Man:'salvarMan',Lav:'salvarLav'},lp={Fuel:'limparFuel',Oleo:'limparOleo',Man:'limparMan',Lav:'limparLav'};
- Object.keys(DOBRA).forEach(t=>{let k=DOBRA[t][1];
+ Object.keys(DOBRA).filter(t=>ed[t]).forEach(t=>{let k=DOBRA[t][1];
   let e=window[ed[t]];window[ed[t]]=function(){abrirForm(t);let r=e.apply(this,arguments);setTimeout(()=>$('fb'+t).parentElement.scrollIntoView({behavior:'smooth',block:'start'}),80);return r};
   let s=window[sv[t]];window[sv[t]]=function(){let a=localStorage.getItem(K(k));let r=s.apply(this,arguments);if(localStorage.getItem(K(k))!==a)fecharForm(t);return r};
   let c=window[lp[t]];window[lp[t]]=function(){let editando=$('ed'+t)&&$('ed'+t).style.display==='block';let r=c.apply(this,arguments);if(editando)fecharForm(t);return r}})}
