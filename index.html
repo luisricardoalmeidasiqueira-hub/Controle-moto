@@ -177,7 +177,7 @@ async function instalarApp(){
  $('passosInstalar').innerHTML=h;$('modalInstalar').classList.remove('hidden')}
 function fecharInstalar(){$('modalInstalar').classList.add('hidden')}
 
-const VERSAO='4.4',VERSAO_DATA='11/10/2026';
+const VERSAO='4.5',VERSAO_DATA='18/10/2026';
 function mostrarVersao(extra){$('versaoInfo').innerHTML='Versão '+VERSAO+' • '+VERSAO_DATA+(extra||'')}
 async function atualizarApp(){try{if('caches'in window){let k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)))}let r=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(r)await r.update()}catch(e){}location.reload()}
 async function checarVersao(){mostrarVersao();if(!navigator.onLine){mostrarVersao(' • 📴 sem internet');return}
