@@ -46,9 +46,10 @@ button{padding:8px!important;font-size:13px!important;border-radius:9px!importan
 h2.dobra{cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin:0!important;user-select:none;-webkit-user-select:none}h2.dobra .seta{font-size:13px;font-weight:bold;background:#1f8a4c;color:#fff;border-radius:20px;padding:4px 10px;flex:0 0 auto}h2.dobra.on .seta{background:#e8eef2;color:#17384c}h2.dobra.on{margin-bottom:10px!important}.fbody{display:none}.fbody.aberto{display:block}
 .lavCasa .lavFora{display:none!important}
 </style><style>.fotoBtn{display:block;text-align:center;padding:10px 12px;border-radius:10px;background:var(--c,#1f6f9f);color:#fff;font-weight:bold;font-size:14px;cursor:pointer;flex:1 1 42%}.fotoBtn.sec{background:#e8eef2;color:#17212b;border:1px solid #c9d5dd}.fotoBtn.big{flex:1 1 100%;font-size:15px;padding:12px}.fotoRow{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}</style>
+<style>.btnAtt.btnVer{width:auto!important;flex:0 0 auto!important;padding:0 12px!important;border-radius:20px!important;font-size:13.5px!important;font-weight:bold;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}</style>
 </head>
 <body><div class="wall"></div>
-<header><div style="display:flex;align-items:center;gap:8px"><h1 style="flex:1">🏍️ Controle da Moto</h1><button class="btnAtt" onclick="abrirTemas()" title="Cor do app" aria-label="Escolher a cor do app">🎨</button><button class="btnAtt" onclick="atualizarApp()" title="Atualizar aplicativo" aria-label="Atualizar aplicativo">🔄</button></div><p>Óleo • Pneus • Manutenção • Abastecimento • Lavagem • Documento</p></header>
+<header><div style="display:flex;align-items:center;gap:8px"><h1 style="flex:1">🏍️ Controle da Moto</h1><button class="btnAtt" onclick="abrirTemas()" title="Cor do app" aria-label="Escolher a cor do app">🎨</button><button class="btnAtt btnVer" id="btnVer" onclick="atualizarApp()" title="Atualizar aplicativo" aria-label="Atualizar aplicativo">🔄 <span id="verTopo"></span></button></div><p>Óleo • Pneus • Manutenção • Abastecimento • Lavagem • Documento</p></header>
 <main>
 <div class="tabs">
 <button id="tMoto" class="tab active" onclick="showTab('moto')"><span class="e">🏍️</span>Moto</button>
@@ -178,8 +179,8 @@ async function instalarApp(){
  $('passosInstalar').innerHTML=h;$('modalInstalar').classList.remove('hidden')}
 function fecharInstalar(){$('modalInstalar').classList.add('hidden')}
 
-const VERSAO='4.7',VERSAO_DATA='18/10/2026';
-function mostrarVersao(extra){$('versaoInfo').innerHTML='Versão '+VERSAO+' • '+VERSAO_DATA+(extra||'')}
+const VERSAO='4.8',VERSAO_DATA='18/10/2026';
+function mostrarVersao(extra){let vt=$('verTopo');if(vt)vt.textContent='v'+VERSAO;$('versaoInfo').innerHTML='Versão '+VERSAO+' • '+VERSAO_DATA+(extra||'')}
 async function atualizarApp(){try{if('caches'in window){let k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)))}let r=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(r)await r.update()}catch(e){}location.reload()}
 async function checarVersao(){mostrarVersao();if(!navigator.onLine){mostrarVersao(' • 📴 sem internet');return}
  try{let t=await(await fetch('index.html?v='+Date.now(),{cache:'no-store'})).text(),m=t.match(/const VERSAO='([^']+)'/);if(!m)return;
